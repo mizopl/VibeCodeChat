@@ -38,17 +38,17 @@ export async function POST(request: NextRequest) {
     let currentSessionId: string;
     let isNewSession = false;
     
+    const databaseService = getDatabaseService();
+    
     if (existingSessionId) {
       // Check if session exists
-      const databaseService = getDatabaseService();
       const existingSession = await databaseService.getChatSession(existingSessionId);
       if (existingSession) {
         currentSessionId = existingSessionId;
         console.log('📝 Using existing chat session:', currentSessionId);
-              } else {
-          // Session doesn't exist, create new one
-          const databaseService = getDatabaseService();
-          const session = await databaseService.createChatSession();
+      } else {
+        // Session doesn't exist, create new one
+        const session = await databaseService.createChatSession();
         currentSessionId = session.id;
         isNewSession = true;
         console.log('📝 Created new chat session (invalid sessionId provided):', currentSessionId);
@@ -61,9 +61,8 @@ export async function POST(request: NextRequest) {
       console.log('📝 Created new chat session:', currentSessionId);
     }
 
-          // Add user message to database
-      const databaseService = getDatabaseService();
-      await databaseService.addMessage(currentSessionId, 'user', userMessage.content);
+    // Add user message to database
+    await databaseService.addMessage(currentSessionId, 'user', userMessage.content);
 
     // Initialize agent context
     const agentContext: AgentContext = {
@@ -92,8 +91,7 @@ export async function POST(request: NextRequest) {
       // Log structured extraction if this is parameter extraction
       if (step === 'parameter-extraction' && details.status === 'completed') {
         try {
-          const databaseService = getDatabaseService();
-        await databaseService.logStructuredExtraction(
+          await databaseService.logStructuredExtraction(
             currentSessionId,
             userMessage.content,
             details.parameters,
@@ -109,7 +107,6 @@ export async function POST(request: NextRequest) {
       // Log API call if this is an API call
       if (step === 'api-call' && details.status === 'completed') {
         try {
-          const databaseService = getDatabaseService();
           await databaseService.logApiCall(
             currentSessionId,
             details.method,
@@ -147,7 +144,6 @@ export async function POST(request: NextRequest) {
     const responseMetadata = agent.context.lastResponseMetadata;
 
     // Add assistant message to database with metadata
-    const databaseService = getDatabaseService();
     await databaseService.addMessage(
       currentSessionId, 
       'assistant', 
