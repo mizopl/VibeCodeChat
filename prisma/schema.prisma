@@ -171,8 +171,8 @@ model PersonalInterest {
   createdAt   DateTime @default(now())
   
   // Relations
-  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  persona Persona @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade, map: "personal_interests_session_fkey")
+  persona Persona @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade, map: "personal_interests_persona_fkey")
   
   @@map("personal_interests")
 }
@@ -189,8 +189,8 @@ model AudienceCharacteristic {
   createdAt     DateTime @default(now())
   
   // Relations
-  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  persona Persona @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade, map: "audience_characteristics_session_fkey")
+  persona Persona @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade, map: "audience_characteristics_persona_fkey")
   
   @@map("audience_characteristics")
 }
