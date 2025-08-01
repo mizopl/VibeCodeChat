@@ -274,7 +274,8 @@ Extract all relevant persona information:`;
 
       // Update basic persona info
       if (personaUpdate.name || personaUpdate.location || personaUpdate.gender) {
-        await databaseService.updatePersona(this.sessionId, {
+        const databaseService = getDatabaseService();
+      await databaseService.updatePersona(this.sessionId, {
           name: personaUpdate.name,
           location: personaUpdate.location,
           gender: personaUpdate.gender,
@@ -289,7 +290,8 @@ Extract all relevant persona information:`;
       for (const interest of personaUpdate.interests || []) {
         const qlooEntity = qlooEntities.find(e => e.name.toLowerCase() === interest.name.toLowerCase());
         
-        await databaseService.addPersonalInterest(this.sessionId, {
+        const databaseService = getDatabaseService();
+      await databaseService.addPersonalInterest(this.sessionId, {
           category: interest.category,
           name: interest.name,
           entityId: qlooEntity?.entityId,
@@ -305,7 +307,8 @@ Extract all relevant persona information:`;
 
       // Add audience characteristics
       for (const audience of personaUpdate.audiences || []) {
-        await databaseService.addAudienceCharacteristic(this.sessionId, {
+        const databaseService = getDatabaseService();
+      await databaseService.addAudienceCharacteristic(this.sessionId, {
           type: audience.type,
           name: audience.name,
           confidence: audience.confidence

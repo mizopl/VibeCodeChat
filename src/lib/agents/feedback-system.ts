@@ -63,6 +63,7 @@ export class FeedbackSystem {
           break;
       }
 
+      const databaseService = getDatabaseService();
       await databaseService.storeRecommendationFeedback(
         this.sessionId,
         `implicit-${Date.now()}`,
@@ -109,6 +110,7 @@ export class FeedbackSystem {
 
     try {
       // Ensure persona exists
+      const databaseService = getDatabaseService();
       await databaseService.getOrCreatePersona(this.sessionId);
       
       // Determine interest category based on recommendation type
@@ -116,7 +118,8 @@ export class FeedbackSystem {
       
       if (feedback === 'positive' && rating >= 4) {
         // Strengthen interest
-        await databaseService.addExplicitInterest(
+        const databaseService = getDatabaseService();
+      await databaseService.addExplicitInterest(
           this.sessionId,
           category,
           recommendationName,
@@ -125,7 +128,8 @@ export class FeedbackSystem {
         console.log('✅ Strengthened interest:', recommendationName);
       } else if (feedback === 'negative' && rating <= 2) {
         // Weaken interest or add to dislikes
-        await databaseService.updatePersonalInterestConfidence(
+        const databaseService = getDatabaseService();
+      await databaseService.updatePersonalInterestConfidence(
           this.sessionId,
           recommendationName,
           -0.2
@@ -179,6 +183,7 @@ export class FeedbackSystem {
     }
 
     try {
+      const databaseService = getDatabaseService();
       const feedback = await databaseService.getRecommendationFeedback(this.sessionId);
       
       if (feedback.length === 0) {
@@ -262,6 +267,7 @@ export class FeedbackSystem {
     }
 
     try {
+      const databaseService = getDatabaseService();
       const feedback = await databaseService.getRecommendationFeedback(this.sessionId);
       
       // Get recent feedback (last 10)

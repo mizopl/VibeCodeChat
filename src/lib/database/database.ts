@@ -296,6 +296,134 @@ export class DatabaseService {
     }
   }
 
+  // Personal Interest Management
+  async addPersonalInterest(sessionId: string, interestData: any) {
+    try {
+      const session = await this.getChatSession(sessionId);
+      if (!session) {
+        throw new Error('Session not found');
+      }
+
+      const interestId = `interest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const interest = {
+        id: interestId,
+        sessionId,
+        ...interestData,
+        timestamp: new Date().toISOString()
+      };
+
+      session.personalInterests.push(interest);
+      session.updatedAt = new Date().toISOString();
+
+      await this.kv.set(`session:${sessionId}`, session);
+      await this.kv.set(`interest:${interestId}`, interest);
+      
+      console.log(`✅ Added personal interest: ${interestId}`);
+      return interest;
+    } catch (error) {
+      console.error('❌ Failed to add personal interest:', error);
+      throw error;
+    }
+  }
+
+  // Recommendation Feedback Management
+  async storeRecommendationFeedback(
+    sessionId: string,
+    recommendationId: string,
+    recommendationType: string,
+    recommendationName: string,
+    rating: number,
+    feedback: string,
+    comment?: string,
+    metadata?: any
+  ) {
+    try {
+      const session = await this.getChatSession(sessionId);
+      if (!session) {
+        throw new Error('Session not found');
+      }
+
+      const feedbackId = `feedback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const feedbackData = {
+        id: feedbackId,
+        sessionId,
+        recommendationId,
+        recommendationType,
+        recommendationName,
+        rating,
+        feedback,
+        comment,
+        metadata,
+        timestamp: new Date().toISOString()
+      };
+
+      session.recommendationFeedback = session.recommendationFeedback || [];
+      session.recommendationFeedback.push(feedbackData);
+      session.updatedAt = new Date().toISOString();
+
+      await this.kv.set(`session:${sessionId}`, session);
+      await this.kv.set(`feedback:${feedbackId}`, feedbackData);
+      
+      console.log(`✅ Stored recommendation feedback: ${feedbackId}`);
+      return feedbackData;
+    } catch (error) {
+      console.error('❌ Failed to store recommendation feedback:', error);
+      throw error;
+    }
+  }
+
+  async getRecommendationFeedback(sessionId: string) {
+    try {
+      const session = await this.getChatSession(sessionId);
+      if (!session) {
+        return [];
+      }
+      return session.recommendationFeedback || [];
+    } catch (error) {
+      console.error('❌ Failed to get recommendation feedback:', error);
+      return [];
+    }
+  }
+
+  async addExplicitInterest(sessionId: string, category: string, name: string, confidence: number = 0.9) {
+    return await this.addPersonalInterest(sessionId, {
+      category,
+      name,
+      confidence,
+      source: 'explicit'
+    });
+  }
+
+  // Audience Characteristic Management
+  async addAudienceCharacteristic(sessionId: string, characteristicData: any) {
+    try {
+      const session = await this.getChatSession(sessionId);
+      if (!session) {
+        throw new Error('Session not found');
+      }
+
+      const characteristicId = `characteristic_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const characteristic = {
+        id: characteristicId,
+        sessionId,
+        ...characteristicData,
+        timestamp: new Date().toISOString()
+      };
+
+      session.audienceCharacteristics.push(characteristic);
+      session.updatedAt = new Date().toISOString();
+
+      await this.kv.set(`session:${sessionId}`, session);
+      await this.kv.set(`characteristic:${characteristicId}`, characteristic);
+      
+      console.log(`✅ Added audience characteristic: ${characteristicId}`);
+      return characteristic;
+    } catch (error) {
+      console.error('❌ Failed to add audience characteristic:', error);
+      throw error;
+    }
+  }
+
   // Qloo Response Management
   async addQlooResponse(sessionId: string, response: any) {
     try {
