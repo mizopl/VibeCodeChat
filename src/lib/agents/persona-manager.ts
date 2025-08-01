@@ -166,6 +166,7 @@ export class PersonaManager {
     if (!this.sessionId) return;
 
     try {
+      const databaseService = getDatabaseService();
       for (const interest of interests) {
         await databaseService.storePersonalInterest(
           this.sessionId,
@@ -187,6 +188,7 @@ export class PersonaManager {
     if (!this.sessionId) return [];
 
     try {
+      const databaseService = getDatabaseService();
       const interests = await databaseService.getPersonalInterests(this.sessionId);
       return interests.map(interest => ({
         id: interest.id,
@@ -382,6 +384,7 @@ export class PersonaManager {
     if (!this.sessionId) return;
 
     try {
+      const databaseService = getDatabaseService();
       await databaseService.updatePersonalInterestEntityId(interestId, entityId);
     } catch (error) {
       console.error('❌ Failed to update interest entity ID:', error);
@@ -452,6 +455,7 @@ export class PersonaManager {
 
     try {
       const delta = feedback === 'positive' ? 0.1 : -0.1;
+      const databaseService = getDatabaseService();
       await databaseService.updatePersonalInterestConfidence(this.sessionId, interestName, delta);
     } catch (error) {
       console.error('❌ Failed to update interest confidence:', error);
@@ -469,6 +473,7 @@ export class PersonaManager {
       
       if (extraction.name || extraction.location || extraction.gender) {
         // Ensure persona exists first
+        const databaseService = getDatabaseService();
         await databaseService.getOrCreatePersona(this.sessionId, undefined, extraction.name, extraction.location, extraction.gender);
         
         console.log('✅ Updated persona name/location/gender:', { name: extraction.name, location: extraction.location, gender: extraction.gender });
@@ -492,6 +497,7 @@ export class PersonaManager {
       
       if (extraction.name || extraction.location || extraction.gender) {
         // Ensure persona exists first
+        const databaseService = getDatabaseService();
         await databaseService.getOrCreatePersona(this.sessionId, undefined, extraction.name, extraction.location, extraction.gender);
         
         console.log('✅ Updated persona name/location/gender from message:', { name: extraction.name, location: extraction.location, gender: extraction.gender });
@@ -547,6 +553,7 @@ export class PersonaManager {
     }
 
     try {
+      const databaseService = getDatabaseService();
       const persona = await databaseService.getPersona(this.sessionId);
       if (!persona) {
         return { confidence: 0 };

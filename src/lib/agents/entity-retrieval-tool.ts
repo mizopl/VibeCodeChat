@@ -89,6 +89,7 @@ export class EntityRetrievalTool {
    */
   private async findEntityInDatabase(entityName: string) {
     try {
+      const databaseService = getDatabaseService();
       const entities = await databaseService.getSessionEntities(this.sessionId);
       
       // Find the best match by name similarity
@@ -231,6 +232,7 @@ export class EntityRetrievalTool {
    */
   async getAllEntities() {
     try {
+      const databaseService = getDatabaseService();
       const entities = await databaseService.getSessionEntities(this.sessionId);
       return entities.map(entity => ({
         id: entity.id,
