@@ -15,9 +15,9 @@ export async function GET(
       }, { status: 400 });
     }
 
-    // Get session with all details
-    const databaseService = getDatabaseService();
-  const session = await databaseService.getSessionWithDetails(sessionId);
+          // Get session with all details
+      const databaseService = getDatabaseService();
+      const session = await databaseService.getSessionWithDetails(sessionId);
     
     if (!session) {
       return NextResponse.json({
@@ -60,9 +60,9 @@ export async function DELETE(
       }, { status: 400 });
     }
 
-    // Delete session (cascade will delete related records)
-    const databaseService = getDatabaseService();
-    await databaseService.deleteChatSession(sessionId);
+          // Delete session (cascade will delete related records)
+      const databaseService = getDatabaseService();
+      await databaseService.deleteChatSession(sessionId);
 
     return NextResponse.json({
       success: true,

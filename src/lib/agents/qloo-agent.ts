@@ -646,10 +646,10 @@ Return ONLY valid JSON, no markdown formatting.`;
       extractedFields.push('location');
       
       // Update persona location if sessionId is available
-      if (this.sessionId) {
-        try {
-          const databaseService = getDatabaseService();
-          await databaseService.updatePersona(this.sessionId, {
+              if (this.sessionId) {
+          try {
+            const databaseService = getDatabaseService();
+            await databaseService.updatePersona(this.sessionId, {
             location: locationMatch[2]
           });
           console.log('📍 Updated persona location to:', locationMatch[2]);

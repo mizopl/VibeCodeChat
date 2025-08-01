@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
 
     // Get sessions with entity counts
+    const databaseService = getDatabaseService();
     const sessions = await databaseService.getSessionsWithEntityCounts();
     
     // Apply pagination
@@ -41,7 +42,8 @@ export async function POST(request: NextRequest) {
     const { personaId, debugMode = false, personaData } = body;
 
     // Create new session
-    const session = await databaseService.createChatSession(personaId, debugMode);
+          const databaseService = getDatabaseService();
+      const session = await databaseService.createChatSession(personaId, debugMode);
 
     // If persona data is provided, create a persona with interests
     if (personaData) {
@@ -55,7 +57,8 @@ export async function POST(request: NextRequest) {
           interests: [] // Will be populated from bio analysis
         };
         
-        const persona = await databaseService.createPersona(
+        const databaseService = getDatabaseService();
+      const persona = await databaseService.createPersona(
           session.id,
           demographics,
           personaData.name,
@@ -72,7 +75,8 @@ export async function POST(request: NextRequest) {
             console.log('🎯 Processing persona data through chat:', initialMessage);
             
             // Add the initial message to the database
-            await databaseService.addMessage(session.id, 'user', initialMessage);
+            const databaseService = getDatabaseService();
+        await databaseService.addMessage(session.id, 'user', initialMessage);
             
             // Process the persona data directly to extract interests
             console.log('🎯 Processing persona data directly...');
@@ -97,7 +101,8 @@ export async function POST(request: NextRequest) {
               
               // Store each interest
               for (const interest of extractedInterests) {
-                await databaseService.addPersonalInterest(session.id, {
+                const databaseService = getDatabaseService();
+        await databaseService.addPersonalInterest(session.id, {
                   category: interest.category,
                   name: interest.name,
                   confidence: interest.confidence || 0.8,
@@ -109,7 +114,8 @@ export async function POST(request: NextRequest) {
               
               // Update persona confidence based on extracted interests
               const confidence = Math.min(0.9, 0.5 + (extractedInterests.length * 0.1));
-              await databaseService.updatePersonaConfidence(session.id, confidence);
+              const databaseService = getDatabaseService();
+        await databaseService.updatePersonaConfidence(session.id, confidence);
               
               console.log(`✅ Persona confidence updated to: ${confidence}`);
             } catch (error) {

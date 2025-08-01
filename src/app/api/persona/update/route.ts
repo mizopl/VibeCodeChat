@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
     await smartPersonaAgent.processChatMessages(messages);
 
     // Get updated persona data
+    const databaseService = getDatabaseService();
     const persona = await databaseService.getPersona(sessionId);
     const interests = await databaseService.getPersonalInterests(sessionId);
     const audiences = await databaseService.getAudienceCharacteristics(sessionId);

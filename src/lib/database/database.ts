@@ -394,6 +394,255 @@ export class DatabaseService {
     });
   }
 
+  // Message Management
+  async getMessages(sessionId: string) {
+    try {
+      const session = await this.getChatSession(sessionId);
+      return session?.messages || [];
+    } catch (error) {
+      console.error('❌ Failed to get messages:', error);
+      return [];
+    }
+  }
+
+  async deleteMessage(messageId: string, sessionId: string) {
+    try {
+      const session = await this.getChatSession(sessionId);
+      if (!session) {
+        throw new Error('Session not found');
+      }
+      
+      session.messages = session.messages.filter(m => m.id !== messageId);
+      session.updatedAt = new Date().toISOString();
+      
+      await this.kv.set(`session:${sessionId}`, session);
+      await this.kv.del(`message:${messageId}`);
+      
+      console.log(`✅ Deleted message: ${messageId}`);
+    } catch (error) {
+      console.error('❌ Failed to delete message:', error);
+      throw error;
+    }
+  }
+
+  // Session Management
+  async getSessionsWithEntityCounts() {
+    try {
+      const sessions = await this.kv.keys('session:*');
+      const sessionData = await Promise.all(
+        sessions.map(async (key) => {
+          const session = await this.kv.get(key);
+          return {
+            ...session,
+            entityCount: session?.entities?.length || 0
+          };
+        })
+      );
+      return sessionData.filter(Boolean);
+    } catch (error) {
+      console.error('❌ Failed to get sessions with entity counts:', error);
+      return [];
+    }
+  }
+
+  async deleteChatSession(sessionId: string) {
+    try {
+      await this.kv.del(`session:${sessionId}`);
+      console.log(`✅ Deleted chat session: ${sessionId}`);
+    } catch (error) {
+      console.error('❌ Failed to delete chat session:', error);
+      throw error;
+    }
+  }
+
+  async getSessionWithDetails(sessionId: string) {
+    return await this.getChatSession(sessionId);
+  }
+
+  // API Call Management
+  async getApiCalls(sessionId: string, limit: number = 10) {
+    try {
+      const session = await this.getChatSession(sessionId);
+      return session?.apiCalls?.slice(-limit) || [];
+    } catch (error) {
+      console.error('❌ Failed to get API calls:', error);
+      return [];
+    }
+  }
+
+  async logApiCall(sessionId: string, callData: any) {
+    try {
+      const session = await this.getChatSession(sessionId);
+      if (!session) {
+        throw new Error('Session not found');
+      }
+
+      const callId = `api_call_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const apiCall = {
+        id: callId,
+        sessionId,
+        ...callData,
+        timestamp: new Date().toISOString()
+      };
+
+      session.apiCalls = session.apiCalls || [];
+      session.apiCalls.push(apiCall);
+      session.updatedAt = new Date().toISOString();
+
+      await this.kv.set(`session:${sessionId}`, session);
+      await this.kv.set(`api_call:${callId}`, apiCall);
+      
+      console.log(`✅ Logged API call: ${callId}`);
+      return apiCall;
+    } catch (error) {
+      console.error('❌ Failed to log API call:', error);
+      throw error;
+    }
+  }
+
+  // Entity Management
+  async getSessionEntities(sessionId: string) {
+    try {
+      const session = await this.getChatSession(sessionId);
+      return session?.entities || [];
+    } catch (error) {
+      console.error('❌ Failed to get session entities:', error);
+      return [];
+    }
+  }
+
+  async storeEntitiesFromResponse(sessionId: string, entities: any[]) {
+    try {
+      const session = await this.getChatSession(sessionId);
+      if (!session) {
+        throw new Error('Session not found');
+      }
+
+      session.entities = session.entities || [];
+      session.entities.push(...entities);
+      session.updatedAt = new Date().toISOString();
+
+      await this.kv.set(`session:${sessionId}`, session);
+      
+      console.log(`✅ Stored ${entities.length} entities from response`);
+      return entities;
+    } catch (error) {
+      console.error('❌ Failed to store entities from response:', error);
+      throw error;
+    }
+  }
+
+  // Persona Management
+  async getOrCreatePersona(sessionId: string, personaId?: string, name?: string, location?: string, gender?: string) {
+    try {
+      let persona = await this.getPersona(sessionId);
+      
+      if (!persona) {
+        persona = await this.createPersona(sessionId, {
+          name: name || 'Unknown',
+          location: location || 'Unknown',
+          gender: gender || 'Unknown',
+          interests: [],
+          audiences: []
+        });
+      }
+      
+      return persona;
+    } catch (error) {
+      console.error('❌ Failed to get or create persona:', error);
+      throw error;
+    }
+  }
+
+  async getPersonalInterests(sessionId: string) {
+    try {
+      const session = await this.getChatSession(sessionId);
+      return session?.personalInterests || [];
+    } catch (error) {
+      console.error('❌ Failed to get personal interests:', error);
+      return [];
+    }
+  }
+
+  async getAudienceCharacteristics(sessionId: string) {
+    try {
+      const session = await this.getChatSession(sessionId);
+      return session?.audienceCharacteristics || [];
+    } catch (error) {
+      console.error('❌ Failed to get audience characteristics:', error);
+      return [];
+    }
+  }
+
+  async updatePersonaConfidence(sessionId: string, confidence: number) {
+    try {
+      const session = await this.getChatSession(sessionId);
+      if (!session) {
+        throw new Error('Session not found');
+      }
+
+      session.persona = session.persona || {};
+      session.persona.confidence = confidence;
+      session.updatedAt = new Date().toISOString();
+
+      await this.kv.set(`session:${sessionId}`, session);
+      
+      console.log(`✅ Updated persona confidence: ${confidence}`);
+    } catch (error) {
+      console.error('❌ Failed to update persona confidence:', error);
+      throw error;
+    }
+  }
+
+  async storePersonalInterest(sessionId: string, interestData: any) {
+    return await this.addPersonalInterest(sessionId, interestData);
+  }
+
+  async updatePersonalInterestEntityId(interestId: string, entityId: string) {
+    try {
+      const interest = await this.kv.get(`interest:${interestId}`);
+      if (interest) {
+        interest.entityId = entityId;
+        await this.kv.set(`interest:${interestId}`, interest);
+        console.log(`✅ Updated personal interest entity ID: ${interestId}`);
+      }
+    } catch (error) {
+      console.error('❌ Failed to update personal interest entity ID:', error);
+      throw error;
+    }
+  }
+
+  async updatePersonalInterestConfidence(sessionId: string, interestName: string, delta: number) {
+    try {
+      const session = await this.getChatSession(sessionId);
+      if (!session) {
+        throw new Error('Session not found');
+      }
+
+      const interest = session.personalInterests?.find(i => i.name === interestName);
+      if (interest) {
+        interest.confidence = Math.max(0, Math.min(1, (interest.confidence || 0) + delta));
+        session.updatedAt = new Date().toISOString();
+        await this.kv.set(`session:${sessionId}`, session);
+        console.log(`✅ Updated personal interest confidence: ${interestName}`);
+      }
+    } catch (error) {
+      console.error('❌ Failed to update personal interest confidence:', error);
+      throw error;
+    }
+  }
+
+  // Token Usage Management
+  async saveTokenUsage(usage: any) {
+    try {
+      await this.kv.set('global_token_usage', usage);
+      console.log('✅ Saved token usage');
+    } catch (error) {
+      console.error('❌ Failed to save token usage:', error);
+      throw error;
+    }
+  }
+
   // Audience Characteristic Management
   async addAudienceCharacteristic(sessionId: string, characteristicData: any) {
     try {

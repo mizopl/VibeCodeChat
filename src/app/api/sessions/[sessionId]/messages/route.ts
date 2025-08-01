@@ -16,7 +16,8 @@ export async function GET(
     }
 
     // Get session messages
-    const messages = await databaseService.getMessages(sessionId);
+    const databaseService = getDatabaseService();
+  const messages = await databaseService.getMessages(sessionId);
     
     if (!messages || messages.length === 0) {
       return NextResponse.json({

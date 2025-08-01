@@ -142,6 +142,7 @@ class TokenTracker {
         return;
       }
       
+      const databaseService = getDatabaseService();
       const stored = await databaseService.getGlobalTokenUsage();
       if (stored) {
         this.currentUsage = {
@@ -163,6 +164,7 @@ class TokenTracker {
   // Save to storage (non-blocking)
   private async saveToStorage(): Promise<void> {
     try {
+      const databaseService = getDatabaseService();
       await databaseService.saveTokenUsage(this.currentUsage);
       console.log('✅ Global token usage saved to database');
     } catch (error) {

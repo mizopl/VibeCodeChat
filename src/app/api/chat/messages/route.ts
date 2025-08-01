@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
     console.log(`🔍 Get Messages API: Fetching messages for session ${sessionId}`);
 
     // Get messages for the session
+    const databaseService = getDatabaseService();
     const messages = await databaseService.getMessages(sessionId);
 
     return NextResponse.json({

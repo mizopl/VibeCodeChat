@@ -20,7 +20,8 @@ export async function GET(request: NextRequest) {
     console.log('🔍 Persona API called with sessionId:', sessionId);
     const databaseService = getDatabaseService();
     console.log('🔍 databaseService exists:', !!databaseService);
-    console.log('🔍 databaseService.prisma exists:', !!databaseService?.prisma);
+    const databaseService = getDatabaseService();
+    console.log('🔍 databaseService initialized successfully');
 
     // Initialize persona components
     const personaManager = new PersonaManager(sessionId);
@@ -29,6 +30,7 @@ export async function GET(request: NextRequest) {
 
     // Get or create persona data
     console.log('🔍 Calling getOrCreatePersona...');
+    const databaseService = getDatabaseService();
     const persona = await databaseService.getOrCreatePersona(sessionId);
     console.log('🔍 getOrCreatePersona completed, persona:', !!persona);
     const interests = await personaManager.getStoredInterests();
@@ -47,6 +49,7 @@ export async function GET(request: NextRequest) {
     const availableAudiences = await audienceDiscovery.getAvailableAudienceCategories();
 
     // Get recent feedback
+    const databaseService = getDatabaseService();
     const recentFeedback = await databaseService.getRecommendationFeedback(sessionId);
 
     // Generate bio
@@ -172,12 +175,14 @@ export async function POST(request: NextRequest) {
 
                    case 'updateDemographics':
                const { demographics } = data;
-               await databaseService.updatePersona(sessionId, { demographics });
+               const databaseService = getDatabaseService();
+        await databaseService.updatePersona(sessionId, { demographics });
                return NextResponse.json({ success: true, message: 'Demographics updated successfully' });
 
              case 'regenerateBio':
                const bioGenerator = new BioGenerator(sessionId);
-               const persona = await databaseService.getPersona(sessionId);
+               const databaseService = getDatabaseService();
+        const persona = await databaseService.getPersona(sessionId);
                const interests = await personaManager.getStoredInterests();
                const feedbackAnalysis = await feedbackSystem.getFeedbackAnalysis();
                
