@@ -570,7 +570,6 @@ Or just ask me for recommendations and I'll help you discover new things! 🚀`;
               );
               console.log('💾 Stored full entity data in database');
             }
-          }
           } catch (dbError) {
             console.error('❌ Failed to store entities:', dbError);
           }
