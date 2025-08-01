@@ -1,0 +1,215 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Chat sessions
+model ChatSession {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  personaId String?
+  debugMode Boolean  @default(false)
+  
+  // Relations
+  messages   Message[]
+  apiCalls   ApiCall[]
+  tokenUsage TokenUsage[]
+  structuredExtractions StructuredExtraction[]
+  entities   Entity[]  // Entities discovered in this session
+  persona    Persona?  // User persona for this session
+  personalInterests PersonalInterest[]
+  audienceCharacteristics AudienceCharacteristic[]
+  recommendationFeedback RecommendationFeedback[]
+  
+  @@map("chat_sessions")
+}
+
+// Chat messages
+model Message {
+  id           String      @id @default(cuid())
+  sessionId    String
+  role         String      // 'user' | 'assistant'
+  content      String
+  timestamp    DateTime    @default(now())
+  usage        Json?       // Token usage for this message
+  metadata     Json?       // Additional metadata
+  
+  // Relations
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  @@map("messages")
+}
+
+// Qloo Entities - Store discovered entities with full data
+model Entity {
+  id          String   @id @default(cuid())
+  sessionId   String
+  qlooId      String   // Qloo entity ID
+  name        String   // Entity name
+  type        String   // Entity type (urn:entity:movie, etc.)
+  subtype     String?  // Entity subtype
+  description String?  // Entity description
+  metadata    Json     // Full Qloo entity metadata
+  tags        Json?    // Associated tags
+  location    Json?    // Location data if applicable
+  confidence  Float    // Confidence score
+  source      String   // How this entity was discovered (search, insights, etc.)
+  timestamp   DateTime @default(now())
+  
+  // Relations
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  // Unique constraint to prevent duplicate entities per session
+  @@unique([sessionId, qlooId])
+  @@map("entities")
+}
+
+// API calls tracking
+model ApiCall {
+  id          String   @id @default(cuid())
+  sessionId   String
+  endpoint    String   // API endpoint called
+  method      String   // GET, POST, etc.
+  parameters  Json     // Request parameters
+  response    Json?    // Response data
+  status      Int      // HTTP status code
+  duration    Int      // Response time in ms
+  timestamp   DateTime @default(now())
+  error       String?  // Error message if failed
+  
+  // Relations
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  @@map("api_calls")
+}
+
+// Token usage tracking
+model TokenUsage {
+  id            String   @id @default(cuid())
+  sessionId     String
+  promptTokens  Int
+  completionTokens Int
+  totalTokens   Int
+  cost          Float    // Estimated cost in USD
+  timestamp     DateTime @default(now())
+  source        String   // 'chat', 'api_call', 'structured_extraction'
+  
+  // Relations
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  @@map("token_usage")
+}
+
+// Structured extraction results
+model StructuredExtraction {
+  id          String   @id @default(cuid())
+  sessionId   String
+  query       String   // Original user query
+  parameters  Json     // Extracted parameters
+  confidence  Float    // Confidence score
+  reasoning   String   // Reasoning for extraction
+  extractedFields Json // Array of extracted field names
+  timestamp   DateTime @default(now())
+  
+  // Relations
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  @@map("structured_extractions")
+}
+
+// Global token usage tracking
+model GlobalTokenUsage {
+  id                  String   @id @default("global")
+  totalPromptTokens   Int      @default(0)
+  totalCompletionTokens Int    @default(0)
+  totalTokens         Int      @default(0)
+  sessionTokens       Int      @default(0)
+  lastUpdated         DateTime @default(now())
+  costEstimate        Float    @default(0)
+  
+  @@map("global_token_usage")
+}
+
+// Persona - User profile and characteristics
+model Persona {
+  id          String   @id @default(cuid())
+  sessionId   String   @unique
+  name        String?  // User's name
+  location    String?  // Current location
+  gender      String?  // User's gender (male, female, non-binary, etc.)
+  demographics Json?   // Age, gender, location, etc.
+  confidence  Float    @default(0.5)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  personalInterests PersonalInterest[]
+  audienceCharacteristics AudienceCharacteristic[]
+
+  @@map("personas")
+}
+
+// Personal interests - User's preferences and likes
+model PersonalInterest {
+  id          String   @id @default(cuid())
+  sessionId   String
+  category    String   // brands, entertainment, lifestyle, etc.
+  name        String   // Interest name (e.g., "Nike", "Action Movies")
+  entityId    String?  // Qloo entity ID if resolved
+  confidence  Float    @default(0.5)
+  source      String   // 'explicit', 'inferred', 'interaction'
+  metadata    Json?    // Additional metadata
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  persona Persona @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
+  
+  @@map("personal_interests")
+}
+
+// Audience characteristics - User's audience segments
+model AudienceCharacteristic {
+  id            String   @id @default(cuid())
+  sessionId     String
+  audienceType  String   // urn:audience:communities, etc.
+  audienceId    String   // Qloo audience ID
+  name          String   // Audience name
+  confidence    Float    @default(0.5)
+  metadata      Json?    // Additional metadata
+  createdAt     DateTime @default(now())
+  
+  // Relations
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  persona Persona @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
+  
+  @@map("audience_characteristics")
+}
+
+// Recommendation feedback - User ratings and feedback
+model RecommendationFeedback {
+  id                  String   @id @default(cuid())
+  sessionId           String
+  recommendationId    String   // Unique identifier for the recommendation
+  recommendationType  String   // brand, movie, music, restaurant, other
+  recommendationName  String   // Name of the recommended item
+  rating              Int      // 1-5 star rating
+  feedback            String   // positive, negative, neutral
+  comment             String?  // Optional user comment
+  metadata            Json?    // Additional metadata
+  timestamp           DateTime @default(now())
+  
+  // Relations
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  @@map("recommendation_feedback")
+} 
