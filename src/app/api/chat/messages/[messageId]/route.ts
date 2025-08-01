@@ -23,9 +23,8 @@ export async function DELETE(
       );
     }
 
-    // Delete the message from the database
-          const databaseService = getDatabaseService();
-      await databaseService.deleteMessage(messageId, sessionId);
+    const databaseService = getDatabaseService();
+    await databaseService.deleteMessage(messageId, sessionId);
 
     return NextResponse.json(
       { success: true, message: 'Message deleted successfully' },

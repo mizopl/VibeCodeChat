@@ -15,7 +15,6 @@ export async function POST(request: NextRequest) {
 
     console.log('🔍 Chat history query:', { query, sessionId, entityName, entityType });
 
-    // Verify session exists
     const databaseService = getDatabaseService();
     const session = await databaseService.getChatSession(sessionId);
     if (!session) {

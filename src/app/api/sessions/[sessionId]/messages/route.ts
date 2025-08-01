@@ -15,9 +15,8 @@ export async function GET(
       }, { status: 400 });
     }
 
-    // Get session messages
     const databaseService = getDatabaseService();
-  const messages = await databaseService.getMessages(sessionId);
+    const messages = await databaseService.getMessages(sessionId);
     
     if (!messages || messages.length === 0) {
       return NextResponse.json({

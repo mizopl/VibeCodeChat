@@ -272,10 +272,11 @@ Extract all relevant persona information:`;
     try {
       console.log(`🔍 Smart Persona Agent: Updating persona with ${personaUpdate.interests?.length || 0} interests, ${qlooEntities.length} QLOO entities`);
 
+      const databaseService = getDatabaseService();
+
       // Update basic persona info
       if (personaUpdate.name || personaUpdate.location || personaUpdate.gender) {
-        const databaseService = getDatabaseService();
-      await databaseService.updatePersona(this.sessionId, {
+        await databaseService.updatePersona(this.sessionId, {
           name: personaUpdate.name,
           location: personaUpdate.location,
           gender: personaUpdate.gender,
@@ -290,8 +291,7 @@ Extract all relevant persona information:`;
       for (const interest of personaUpdate.interests || []) {
         const qlooEntity = qlooEntities.find(e => e.name.toLowerCase() === interest.name.toLowerCase());
         
-        const databaseService = getDatabaseService();
-      await databaseService.addPersonalInterest(this.sessionId, {
+        await databaseService.addPersonalInterest(this.sessionId, {
           category: interest.category,
           name: interest.name,
           entityId: qlooEntity?.entityId,
@@ -307,8 +307,7 @@ Extract all relevant persona information:`;
 
       // Add audience characteristics
       for (const audience of personaUpdate.audiences || []) {
-        const databaseService = getDatabaseService();
-      await databaseService.addAudienceCharacteristic(this.sessionId, {
+        await databaseService.addAudienceCharacteristic(this.sessionId, {
           type: audience.type,
           name: audience.name,
           confidence: audience.confidence

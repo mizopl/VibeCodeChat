@@ -118,8 +118,7 @@ export class FeedbackSystem {
       
       if (feedback === 'positive' && rating >= 4) {
         // Strengthen interest
-        const databaseService = getDatabaseService();
-      await databaseService.addExplicitInterest(
+        await databaseService.addExplicitInterest(
           this.sessionId,
           category,
           recommendationName,
@@ -128,8 +127,7 @@ export class FeedbackSystem {
         console.log('✅ Strengthened interest:', recommendationName);
       } else if (feedback === 'negative' && rating <= 2) {
         // Weaken interest or add to dislikes
-        const databaseService = getDatabaseService();
-      await databaseService.updatePersonalInterestConfidence(
+        await databaseService.updatePersonalInterestConfidence(
           this.sessionId,
           recommendationName,
           -0.2

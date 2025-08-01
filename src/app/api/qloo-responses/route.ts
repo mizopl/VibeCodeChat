@@ -17,7 +17,6 @@ export async function GET(request: NextRequest) {
 
     // Get API calls for the session
     const databaseService = getDatabaseService();
-      const databaseService = getDatabaseService();
     const apiCalls = await databaseService.getApiCalls(sessionId, limit);
     
     // Filter by source if specified
@@ -26,7 +25,6 @@ export async function GET(request: NextRequest) {
       : apiCalls;
 
     // Get entities for the session
-    const databaseService = getDatabaseService();
     const entities = await databaseService.getSessionEntities(sessionId);
 
     return NextResponse.json({

@@ -29,9 +29,9 @@ export async function GET(request: NextRequest) {
     const feedbackSystem = new FeedbackSystem(sessionId);
 
     // Get or create persona data
-    console.log('🔍 Calling getOrCreatePersona...');
-    const databaseService = getDatabaseService();
-    const persona = await databaseService.getOrCreatePersona(sessionId);
+          console.log('🔍 Calling getOrCreatePersona...');
+      const databaseService = getDatabaseService();
+      const persona = await databaseService.getOrCreatePersona(sessionId);
     console.log('🔍 getOrCreatePersona completed, persona:', !!persona);
     const interests = await personaManager.getStoredInterests();
     const personaSummary = await personaManager.getPersonaSummary();
@@ -48,9 +48,9 @@ export async function GET(request: NextRequest) {
     // Get available audience categories
     const availableAudiences = await audienceDiscovery.getAvailableAudienceCategories();
 
-    // Get recent feedback
-    const databaseService = getDatabaseService();
-    const recentFeedback = await databaseService.getRecommendationFeedback(sessionId);
+          // Get recent feedback
+      const databaseService = getDatabaseService();
+      const recentFeedback = await databaseService.getRecommendationFeedback(sessionId);
 
     // Generate bio
     const bioGenerator = new BioGenerator(sessionId);
@@ -174,15 +174,15 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: true, message: 'Interaction tracked successfully' });
 
                    case 'updateDemographics':
-               const { demographics } = data;
-               const databaseService = getDatabaseService();
-        await databaseService.updatePersona(sessionId, { demographics });
+                               const { demographics } = data;
+                const databaseService = getDatabaseService();
+                await databaseService.updatePersona(sessionId, { demographics });
                return NextResponse.json({ success: true, message: 'Demographics updated successfully' });
 
              case 'regenerateBio':
-               const bioGenerator = new BioGenerator(sessionId);
-               const databaseService = getDatabaseService();
-        const persona = await databaseService.getPersona(sessionId);
+                               const bioGenerator = new BioGenerator(sessionId);
+                const databaseService = getDatabaseService();
+                const persona = await databaseService.getPersona(sessionId);
                const interests = await personaManager.getStoredInterests();
                const feedbackAnalysis = await feedbackSystem.getFeedbackAnalysis();
                
