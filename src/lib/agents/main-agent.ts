@@ -563,7 +563,8 @@ Or just ask me for recommendations and I'll help you discover new things! 🚀`;
             // Store the complete raw entities from the correct path
             const rawEntities = apiResponse.data.results?.entities || apiResponse.data.entities || [];
             if (rawEntities.length > 0) {
-              await databaseService.storeEntitiesFromResponse(
+              const databaseService = getDatabaseService();
+      await databaseService.storeEntitiesFromResponse(
                 this.context.sessionId,
                 rawEntities,
                 'insights-api'

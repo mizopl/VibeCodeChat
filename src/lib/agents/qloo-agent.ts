@@ -125,6 +125,7 @@ export class QlooAgent {
       // Log structured extraction to database if session is available
       if (this.sessionId) {
         try {
+          const databaseService = getDatabaseService();
           await databaseService.logStructuredExtraction(
             this.sessionId,
             userQuery,
@@ -203,6 +204,7 @@ export class QlooAgent {
       // Log structured extraction to database if session is available
       if (this.sessionId) {
         try {
+          const databaseService = getDatabaseService();
           await databaseService.logStructuredExtraction(
             this.sessionId,
             userQuery,
@@ -646,6 +648,7 @@ Return ONLY valid JSON, no markdown formatting.`;
       // Update persona location if sessionId is available
       if (this.sessionId) {
         try {
+          const databaseService = getDatabaseService();
           await databaseService.updatePersona(this.sessionId, {
             location: locationMatch[2]
           });

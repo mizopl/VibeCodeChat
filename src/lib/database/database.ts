@@ -255,6 +255,47 @@ export class DatabaseService {
     }
   }
 
+  // Structured Extraction Management
+  async logStructuredExtraction(
+    sessionId: string,
+    query: string,
+    parameters: any,
+    confidence: number,
+    reasoning: string,
+    extractedFields: string[]
+  ) {
+    try {
+      const session = await this.getChatSession(sessionId);
+      if (!session) {
+        throw new Error('Session not found');
+      }
+
+      const extractionId = `extraction_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const extraction = {
+        id: extractionId,
+        sessionId,
+        query,
+        parameters,
+        confidence,
+        reasoning,
+        extractedFields,
+        timestamp: new Date().toISOString()
+      };
+
+      session.structuredExtractions.push(extraction);
+      session.updatedAt = new Date().toISOString();
+
+      await this.kv.set(`session:${sessionId}`, session);
+      await this.kv.set(`extraction:${extractionId}`, extraction);
+      
+      console.log(`✅ Logged structured extraction: ${extractionId}`);
+      return extraction;
+    } catch (error) {
+      console.error('❌ Failed to log structured extraction:', error);
+      throw error;
+    }
+  }
+
   // Qloo Response Management
   async addQlooResponse(sessionId: string, response: any) {
     try {

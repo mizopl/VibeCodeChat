@@ -93,6 +93,7 @@ export class ChatHistoryAgent {
 
   private async searchEntitiesInDatabase(query: ChatHistoryQuery): Promise<any[]> {
     try {
+      const databaseService = getDatabaseService();
       const sessionEntities = await databaseService.getSessionEntities(this.sessionId);
       
       if (!sessionEntities || sessionEntities.length === 0) {
@@ -123,6 +124,7 @@ export class ChatHistoryAgent {
 
   private async getRelevantMessages(query: string): Promise<any[]> {
     try {
+      const databaseService = getDatabaseService();
       const session = await databaseService.getChatSession(this.sessionId);
       if (!session?.messages) {
         return [];
@@ -173,6 +175,7 @@ export class ChatHistoryAgent {
   async getEntityDetails(entityName: string, entityType?: string): Promise<any | null> {
     try {
       // First try to find in database
+      const databaseService = getDatabaseService();
       const sessionEntities = await databaseService.getSessionEntities(this.sessionId);
       const databaseEntity = sessionEntities.find(e => 
         e.name.toLowerCase().includes(entityName.toLowerCase())
