@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { databaseService } from '@/lib/database/database';
+import { getDatabaseService } from '@/lib/database/database';
 import { PersonaManager } from '@/lib/agents/persona-manager';
 import { AudienceDiscovery } from '@/lib/agents/audience-discovery';
 import { FeedbackSystem } from '@/lib/agents/feedback-system';
@@ -18,6 +18,7 @@ export async function GET(request: NextRequest) {
     }
 
     console.log('🔍 Persona API called with sessionId:', sessionId);
+    const databaseService = getDatabaseService();
     console.log('🔍 databaseService exists:', !!databaseService);
     console.log('🔍 databaseService.prisma exists:', !!databaseService?.prisma);
 
@@ -154,6 +155,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const databaseService = getDatabaseService();
     const personaManager = new PersonaManager(sessionId);
     const feedbackSystem = new FeedbackSystem(sessionId);
 

@@ -1,6 +1,6 @@
 import { generateText } from 'ai';
 import { google } from '@ai-sdk/google';
-import { databaseService } from '../database/database';
+import { getDatabaseService } from '../database/database';
 import { getEntity } from '../qloo/api';
 import { broadcastDebugMessage } from '../utils/debug';
 import { SmartInterestExtractor, ExtractedInterest } from './smart-interest-extractor';

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { databaseService } from '@/lib/database/database';
+import { getDatabaseService } from '@/lib/database/database';
 
 export async function GET(
   request: NextRequest,
@@ -16,7 +16,8 @@ export async function GET(
     }
 
     // Get session with all details
-    const session = await databaseService.getSessionWithDetails(sessionId);
+    const databaseService = getDatabaseService();
+  const session = await databaseService.getSessionWithDetails(sessionId);
     
     if (!session) {
       return NextResponse.json({
@@ -60,6 +61,7 @@ export async function DELETE(
     }
 
     // Delete session (cascade will delete related records)
+    const databaseService = getDatabaseService();
     await databaseService.deleteChatSession(sessionId);
 
     return NextResponse.json({

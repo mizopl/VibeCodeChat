@@ -7,7 +7,7 @@ import { parseQlooResponse, ParsedResponse } from '../qloo/parser';
 import { AgentContext, ChatMessage } from '../../types';
 import { broadcastDebugMessage } from '../utils/debug';
 import { PersonaManager, PersonalInterest } from './persona-manager';
-import { databaseService } from '../database/database';
+import { getDatabaseService } from '../database/database';
 import { ChatHistoryAgent } from './chat-history-agent';
 import { EntityRetrievalTool } from './entity-retrieval-tool';
 import { SignalTagSelector } from './signal-tag-selector';

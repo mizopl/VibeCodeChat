@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { databaseService } from '@/lib/database/database';
+import { getDatabaseService } from '@/lib/database/database';
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,7 +16,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Get API calls for the session
-    const apiCalls = await databaseService.getApiCalls(sessionId, limit);
+    const databaseService = getDatabaseService();
+  const apiCalls = await databaseService.getApiCalls(sessionId, limit);
     
     // Filter by source if specified
     const filteredCalls = source 

@@ -1,4 +1,4 @@
-import { databaseService } from '@/lib/database/database';
+import { getDatabaseService } from '@/lib/database/database';
 import { getEntity } from '@/lib/qloo/api';
 import { QlooParameters } from '@/types';
 

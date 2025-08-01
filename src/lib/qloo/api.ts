@@ -8,7 +8,7 @@ import {
   ApiResponse 
 } from '@/types';
 import { trackApiCall, trackError } from '@/lib/utils/debug';
-import { databaseService } from '@/lib/database/database';
+import { getDatabaseService } from '@/lib/database/database';
 import { parseQlooResponse, ParsingLevel, getParsingLevelFromIntent } from './parser';
 import { buildLocationFilter, extractLocationFromQuery } from './location';
 

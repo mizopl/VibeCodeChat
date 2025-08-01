@@ -1,5 +1,5 @@
 import { config } from '../config';
-import { databaseService } from '../database/database';
+import { getDatabaseService } from '../database/database';
 
 export interface TokenUsage {
   totalPromptTokens: number;

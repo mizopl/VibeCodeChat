@@ -3,7 +3,7 @@ import { streamText } from 'ai';
 import { google } from '@ai-sdk/google';
 import { MainAgent } from '@/lib/agents/main-agent';
 import { validateConfig } from '@/lib/config';
-import { databaseService } from '@/lib/database/database';
+import { getDatabaseService } from '@/lib/database/database';
 import { broadcastDebugMessage, trackTokenUsage } from '@/lib/utils/debug';
 import { z } from 'zod';
 import { AgentContext, ChatMessage } from '@/types';

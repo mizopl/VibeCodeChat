@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SmartPersonaAgent } from '../../../../lib/agents/smart-persona-agent';
-import { databaseService } from '../../../../lib/database/database';
+import { getDatabaseService } from '../../../../lib/database/database';
 
 export async function POST(request: NextRequest) {
   try {

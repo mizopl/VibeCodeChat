@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ChatHistoryAgent } from '@/lib/agents/chat-history-agent';
-import { databaseService } from '@/lib/database/database';
+import { getDatabaseService } from '@/lib/database/database';
 
 export async function POST(request: NextRequest) {
   try {

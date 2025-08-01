@@ -10,7 +10,7 @@ import {
 } from '@/types';
 import { determineTargetAPI } from '@/lib/qloo/api';
 import { trackAgentActivity, trackError, trackTokenUsage } from '@/lib/utils/debug';
-import { databaseService } from '@/lib/database/database';
+import { getDatabaseService } from '@/lib/database/database';
 import { getParsingLevelFromIntent } from '@/lib/qloo/parser';
 import { extractLocationFromQuery, buildLocationFilter } from '@/lib/qloo/location';
 import { SignalTagSelector } from './signal-tag-selector';

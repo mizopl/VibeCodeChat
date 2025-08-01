@@ -1,4 +1,4 @@
-import { databaseService } from '../database/database';
+import { getDatabaseService } from '../database/database';
 import { broadcastDebugMessage } from '../utils/debug';
 
 export interface RecommendationFeedback {

@@ -1,6 +1,6 @@
 import { generateText, generateObject } from 'ai';
 import { google } from '@ai-sdk/google';
-import { databaseService } from '../database/database';
+import { getDatabaseService } from '../database/database';
 import { getQlooTags, getEntity, getQlooTagTypes } from '../qloo/api';
 
 export interface PersonaUpdate {
