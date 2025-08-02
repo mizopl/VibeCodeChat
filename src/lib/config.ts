@@ -45,8 +45,13 @@ export type DefaultEntityType = typeof config.defaultEntityType;
 export function validateConfig() {
   const errors: string[] = [];
   
+  // Check if we're in a production-like environment (Vercel, etc.)
+  const isProduction = process.env.NODE_ENV === 'production' || 
+                      process.env.VERCEL_ENV === 'production' ||
+                      process.env.VERCEL_ENV === 'preview';
+  
   // Only validate required keys in production
-  if (process.env.NODE_ENV === 'production') {
+  if (isProduction) {
     if (!config.googleApiKey) {
       errors.push('GOOGLE_API_KEY is required');
     }
