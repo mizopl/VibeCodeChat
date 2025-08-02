@@ -87,8 +87,6 @@ Extract all relevant persona information:`;
       
       const result = await generateText({
         model: google('gemini-1.5-flash'),
-      // Configure Google AI with API key from localStorage
-      configureGoogleAI();
         prompt,
         maxTokens: 1000
       });

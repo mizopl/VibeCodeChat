@@ -863,8 +863,6 @@ Provide a helpful, conversational response to the user's query.`;
       
       const response = await generateText({
         model: google('gemini-2.5-flash'),
-      // Configure Google AI with API key from localStorage
-      configureGoogleAI();
         prompt,
         maxTokens: 600,
       });

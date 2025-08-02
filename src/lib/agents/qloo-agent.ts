@@ -176,10 +176,11 @@ export class QlooAgent {
     try {
       trackAgentActivity('QLOO AGENT', 'Starting structured parameter extraction', { userQuery });
 
-      const { object } = await generateObject({
-        model: google('gemini-2.5-flash'),
       // Configure Google AI with API key from localStorage
       configureGoogleAI();
+      
+      const { object } = await generateObject({
+        model: google('gemini-2.5-flash'),
         schema: QlooParameterSchema,
         schemaName: 'QlooParameterExtraction',
         schemaDescription: 'Extract parameters for Qloo API calls from user queries',

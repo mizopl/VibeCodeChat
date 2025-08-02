@@ -41,10 +41,11 @@ Respond in JSON format:
   "keywords": ["horror", "comedy", "romance"]
 }`;
 
+    // Configure Google AI with API key from localStorage
+    configureGoogleAI();
+    
     const result = await generateText({
       model: google('gemini-2.5-flash'),
-      // Configure Google AI with API key from localStorage
-      configureGoogleAI();
       prompt,
       maxTokens: 300
     });
@@ -175,10 +176,11 @@ Consider:
 
 Respond with just the selected tag names, comma-separated:`;
 
+    // Configure Google AI with API key from localStorage
+    configureGoogleAI();
+    
     const result = await generateText({
       model: google('gemini-2.5-flash'),
-      // Configure Google AI with API key from localStorage
-      configureGoogleAI();
       prompt,
       maxTokens: 200
     });

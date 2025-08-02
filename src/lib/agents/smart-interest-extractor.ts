@@ -79,10 +79,11 @@ Return as JSON array:
   }
 ]`;
 
-      const result = await generateText({
-        model: google('gemini-2.5-flash'),
       // Configure Google AI with API key from localStorage
       configureGoogleAI();
+      
+      const result = await generateText({
+        model: google('gemini-2.5-flash'),
         prompt,
         maxTokens: 800
       });
@@ -177,10 +178,11 @@ Return as JSON array:
   }
 ]`;
 
-      const result = await generateText({
-        model: google('gemini-2.5-flash'),
       // Configure Google AI with API key from localStorage
       configureGoogleAI();
+      
+      const result = await generateText({
+        model: google('gemini-2.5-flash'),
         prompt,
         maxTokens: 800
       });
