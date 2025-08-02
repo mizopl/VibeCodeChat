@@ -23,6 +23,24 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({ onApiKeyChange }) 
     setHasApiKeys(!!(savedGoogleKey || savedQlooKey));
   }, []);
 
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        handleClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   const handleSave = async () => {
     setIsLoading(true);
     setMessage(null);
@@ -74,6 +92,17 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({ onApiKeyChange }) 
     onApiKeyChange?.('');
   };
 
+  const handleClose = () => {
+    setIsOpen(false);
+    setMessage(null);
+  };
+
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      handleClose();
+    }
+  };
+
   return (
     <>
       <button
@@ -98,13 +127,17 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({ onApiKeyChange }) 
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={handleBackdropClick}
+        >
+          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">API Keys</h3>
               <button
-                onClick={() => setIsOpen(false)}
-                className="text-gray-400 hover:text-gray-600"
+                onClick={handleClose}
+                className="text-gray-400 hover:text-gray-600 transition-colors duration-200 p-1 rounded-full hover:bg-gray-100"
+                aria-label="Close modal"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
