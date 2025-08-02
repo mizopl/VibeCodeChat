@@ -12,6 +12,7 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({ onApiKeyChange }) 
   const [qlooApiKey, setQlooApiKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [hasApiKeys, setHasApiKeys] = useState(false);
 
   useEffect(() => {
     // Load existing API keys from localStorage
@@ -19,6 +20,7 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({ onApiKeyChange }) 
     const savedQlooKey = localStorage.getItem('qloo_api_key') || '';
     setGoogleApiKey(savedGoogleKey);
     setQlooApiKey(savedQlooKey);
+    setHasApiKeys(!!(savedGoogleKey || savedQlooKey));
   }, []);
 
   const handleSave = async () => {
@@ -47,6 +49,7 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({ onApiKeyChange }) 
 
       setMessage({ type: 'success', text: 'API keys saved successfully!' });
       onApiKeyChange?.(googleApiKey);
+      setHasApiKeys(true);
       
       // Close the modal after a short delay
       setTimeout(() => {
@@ -66,6 +69,7 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({ onApiKeyChange }) 
     localStorage.removeItem('qloo_api_key');
     setGoogleApiKey('');
     setQlooApiKey('');
+    setHasApiKeys(false);
     setMessage({ type: 'success', text: 'API keys cleared!' });
     onApiKeyChange?.('');
   };
@@ -74,13 +78,23 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({ onApiKeyChange }) 
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="text-xs text-blue-600 hover:text-blue-800 underline flex items-center space-x-1"
+        className={`text-xs flex items-center space-x-1 ${
+          hasApiKeys 
+            ? 'text-blue-600 hover:text-blue-800 underline' 
+            : 'text-red-600 hover:text-red-800 font-semibold'
+        }`}
       >
+        {!hasApiKeys && (
+          <div className="relative">
+            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
+          </div>
+        )}
         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
-        <span>API Keys</span>
+        <span>{hasApiKeys ? 'API Keys' : '! API Keys Required'}</span>
       </button>
 
       {isOpen && (
@@ -101,17 +115,17 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({ onApiKeyChange }) 
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Google API Key
+                  Gemini API Key (Google AI)
                 </label>
                 <input
                   type="password"
                   value={googleApiKey}
                   onChange={(e) => setGoogleApiKey(e.target.value)}
-                  placeholder="Enter your Google API key"
+                  placeholder="Enter your Gemini API key"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Required for AI features and chat functionality
+                  Required for AI features, chat functionality, and persona analysis
                 </p>
               </div>
 
