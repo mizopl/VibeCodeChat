@@ -3,6 +3,7 @@ export const config = {
   // API Keys
   googleApiKey: process.env.GOOGLE_API_KEY || '',
   qlooApiKey: process.env.QLOO_API_KEY || '',
+  vercelOidcToken: process.env.VERCEL_OIDC_TOKEN || '',
   
   // URLs
   qlooApiUrl: 'https://hackathon.api.qloo.com',
@@ -50,6 +51,10 @@ export function validateConfig() {
   
   if (!config.qlooApiKey) {
     errors.push('QLOO_API_KEY is required');
+  }
+  
+  if (!config.vercelOidcToken) {
+    errors.push('VERCEL_OIDC_TOKEN is required for Vercel API access');
   }
   
   if (errors.length > 0) {
