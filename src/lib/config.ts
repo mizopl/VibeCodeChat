@@ -45,12 +45,15 @@ export type DefaultEntityType = typeof config.defaultEntityType;
 export function validateConfig() {
   const errors: string[] = [];
   
-  if (!config.googleApiKey) {
-    errors.push('GOOGLE_API_KEY is required');
-  }
-  
-  if (!config.qlooApiKey) {
-    errors.push('QLOO_API_KEY is required');
+  // Only validate required keys in production
+  if (process.env.NODE_ENV === 'production') {
+    if (!config.googleApiKey) {
+      errors.push('GOOGLE_API_KEY is required');
+    }
+    
+    if (!config.qlooApiKey) {
+      errors.push('QLOO_API_KEY is required');
+    }
   }
   
   if (!config.vercelOidcToken) {
