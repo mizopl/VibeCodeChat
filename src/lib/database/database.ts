@@ -472,9 +472,17 @@ export class DatabaseService {
           const sessionData = await this.redisClient.get(key);
           if (!sessionData) return null;
           const session = JSON.parse(sessionData);
+          
+          // Get persona data for this session
+          const personaData = await this.redisClient.get(`session:${session.id}:persona`);
+          const persona = personaData ? JSON.parse(personaData) : null;
+          
           return {
             ...session,
-            entityCount: session?.entities?.length || 0
+            entityCount: session?.entities?.length || 0,
+            personaName: persona?.name || 'Unknown Persona',
+            personaLocation: persona?.location || 'Unknown',
+            messageCount: session?.messages?.length || 0
           };
         })
       );
@@ -487,7 +495,20 @@ export class DatabaseService {
 
   async deleteChatSession(sessionId: string) {
     try {
+      // Delete the main session
       await this.redisClient.del(`session:${sessionId}`);
+      
+      // Delete associated persona data
+      await this.redisClient.del(`session:${sessionId}:persona`);
+      
+      // Delete all messages for this session
+      const session = await this.getChatSession(sessionId);
+      if (session?.messages) {
+        for (const message of session.messages) {
+          await this.redisClient.del(`message:${message.id}`);
+        }
+      }
+      
       console.log(`✅ Deleted chat session: ${sessionId}`);
     } catch (error) {
       console.error('❌ Failed to delete chat session:', error);
