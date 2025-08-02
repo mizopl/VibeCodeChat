@@ -78,7 +78,7 @@ export class DatabaseService {
   }
 
   // Message Management
-  async addMessage(sessionId: string, message: any) {
+  async addMessage(sessionId: string, role: string, content: string, message?: any) {
     try {
       const session = await this.getChatSession(sessionId);
       if (!session) {
@@ -87,9 +87,11 @@ export class DatabaseService {
 
       const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       const messageWithId = {
-        ...message,
         id: messageId,
-        timestamp: new Date().toISOString()
+        role,
+        content,
+        timestamp: new Date().toISOString(),
+        ...message
       };
 
       session.messages.push(messageWithId);
@@ -117,12 +119,23 @@ export class DatabaseService {
   }
 
   // Persona Management
-  async createPersona(sessionId: string, personaData: any) {
+  async createPersona(
+    sessionId: string, 
+    personaData: any, 
+    name?: string, 
+    location?: string, 
+    gender?: string
+  ) {
     try {
       const personaId = `persona_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       const persona = {
         id: personaId,
         sessionId,
+        name: name || personaData.name || 'Unknown',
+        location: location || personaData.location || 'Unknown',
+        gender: gender || personaData.gender || 'Unknown',
+        demographics: personaData.demographics || personaData,
+        confidence: personaData.confidence || 0.5,
         ...personaData,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
