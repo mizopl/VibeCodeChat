@@ -1,14 +1,35 @@
-import { kv } from '@vercel/kv';
+import { createClient } from 'redis';
 
-// Database service class using Vercel KV with Redis fallback
+// Database service class using Redis directly
 export class DatabaseService {
-  private kv: typeof kv;
+  private redisClient: any;
   private redisUrl: string | undefined;
 
   constructor() {
-    this.kv = kv;
     this.redisUrl = process.env.REDIS_URL;
-    console.log('✅ DatabaseService initialized with Vercel KV/Redis');
+    this.initializeRedis();
+  }
+
+  private async initializeRedis() {
+    try {
+      if (!this.redisUrl) {
+        throw new Error('REDIS_URL is required');
+      }
+
+      this.redisClient = createClient({
+        url: this.redisUrl
+      });
+
+      this.redisClient.on('error', (err: any) => {
+        console.error('❌ Redis Client Error:', err);
+      });
+
+      await this.redisClient.connect();
+      console.log('✅ DatabaseService initialized with Redis');
+    } catch (error) {
+      console.error('❌ Failed to initialize Redis:', error);
+      throw error;
+    }
   }
 
   // Chat Session Management
@@ -31,7 +52,7 @@ export class DatabaseService {
         qlooResponses: []
       };
 
-      await this.kv.set(`session:${sessionId}`, session);
+      await this.redisClient.set(`session:${sessionId}`, JSON.stringify(session));
       console.log(`✅ Created chat session: ${sessionId}`);
       return session;
     } catch (error) {
@@ -42,13 +63,14 @@ export class DatabaseService {
 
   async getChatSession(sessionId: string) {
     try {
-      const session = await this.kv.get(`session:${sessionId}`);
-      if (!session) {
+      const sessionData = await this.redisClient.get(`session:${sessionId}`);
+      if (!sessionData) {
         console.log(`❌ Session not found: ${sessionId}`);
         return null;
       }
+      const session = JSON.parse(sessionData);
       console.log(`✅ Retrieved session: ${sessionId}`);
-      return session as any;
+      return session;
     } catch (error) {
       console.error('❌ Failed to get chat session:', error);
       return null;
@@ -68,7 +90,7 @@ export class DatabaseService {
         updatedAt: new Date().toISOString()
       };
 
-      await this.kv.set(`session:${sessionId}`, updatedSession);
+      await this.redisClient.set(`session:${sessionId}`, JSON.stringify(updatedSession));
       console.log(`✅ Updated session: ${sessionId}`);
       return updatedSession;
     } catch (error) {
@@ -97,8 +119,8 @@ export class DatabaseService {
       session.messages.push(messageWithId);
       session.updatedAt = new Date().toISOString();
 
-      await this.kv.set(`session:${sessionId}`, session);
-      await this.kv.set(`message:${messageId}`, messageWithId);
+      await this.redisClient.set(`session:${sessionId}`, JSON.stringify(session));
+      await this.redisClient.set(`message:${messageId}`, JSON.stringify(messageWithId));
       
       console.log(`✅ Added message to session: ${sessionId}`);
       return messageWithId;
@@ -141,8 +163,8 @@ export class DatabaseService {
         updatedAt: new Date().toISOString()
       };
 
-      await this.kv.set(`persona:${personaId}`, persona);
-      await this.kv.set(`session:${sessionId}:persona`, persona);
+      await this.redisClient.set(`persona:${personaId}`, JSON.stringify(persona));
+      await this.redisClient.set(`session:${sessionId}:persona`, JSON.stringify(persona));
       
       console.log(`✅ Created persona: ${personaId}`);
       return persona;
@@ -154,8 +176,11 @@ export class DatabaseService {
 
   async getPersona(sessionId: string) {
     try {
-      const persona = await this.kv.get(`session:${sessionId}:persona`);
-      return persona as any;
+      const personaData = await this.redisClient.get(`session:${sessionId}:persona`);
+      if (!personaData) {
+        return null;
+      }
+      return JSON.parse(personaData);
     } catch (error) {
       console.error('❌ Failed to get persona:', error);
       return null;
@@ -175,8 +200,8 @@ export class DatabaseService {
         updatedAt: new Date().toISOString()
       };
 
-      await this.kv.set(`persona:${persona.id}`, updatedPersona);
-      await this.kv.set(`session:${sessionId}:persona`, updatedPersona);
+      await this.redisClient.set(`persona:${persona.id}`, JSON.stringify(updatedPersona));
+      await this.redisClient.set(`session:${sessionId}:persona`, JSON.stringify(updatedPersona));
       
       console.log(`✅ Updated persona: ${persona.id}`);
       return updatedPersona;
@@ -205,8 +230,8 @@ export class DatabaseService {
       session.tokenUsage.push(usageWithId);
       session.updatedAt = new Date().toISOString();
 
-      await this.kv.set(`session:${sessionId}`, session);
-      await this.kv.set(`usage:${usageId}`, usageWithId);
+      await this.redisClient.set(`session:${sessionId}`, JSON.stringify(session));
+      await this.redisClient.set(`usage:${usageId}`, JSON.stringify(usageWithId));
       
       console.log(`✅ Added token usage: ${usageId}`);
       return usageWithId;
@@ -218,8 +243,8 @@ export class DatabaseService {
 
   async getGlobalTokenUsage() {
     try {
-      const usage = await this.kv.get('global:token_usage');
-      return usage as any || { totalTokens: 0, totalCost: 0, lastUpdated: null };
+      const usageData = await this.redisClient.get('global:token_usage');
+      return usageData ? JSON.parse(usageData) : { totalTokens: 0, totalCost: 0, lastUpdated: null };
     } catch (error) {
       console.error('❌ Failed to get global token usage:', error);
       return { totalTokens: 0, totalCost: 0, lastUpdated: null };
@@ -228,10 +253,10 @@ export class DatabaseService {
 
   async updateGlobalTokenUsage(usage: any) {
     try {
-      await this.kv.set('global:token_usage', {
+      await this.redisClient.set('global:token_usage', JSON.stringify({
         ...usage,
         lastUpdated: new Date().toISOString()
-      });
+      }));
       console.log('✅ Updated global token usage');
     } catch (error) {
       console.error('❌ Failed to update global token usage:', error);
@@ -257,8 +282,8 @@ export class DatabaseService {
       session.entities.push(entityWithId);
       session.updatedAt = new Date().toISOString();
 
-      await this.kv.set(`session:${sessionId}`, session);
-      await this.kv.set(`entity:${entityId}`, entityWithId);
+      await this.redisClient.set(`session:${sessionId}`, JSON.stringify(session));
+      await this.redisClient.set(`entity:${entityId}`, JSON.stringify(entityWithId));
       
       console.log(`✅ Added entity: ${entityId}`);
       return entityWithId;
@@ -298,8 +323,8 @@ export class DatabaseService {
       session.structuredExtractions.push(extraction);
       session.updatedAt = new Date().toISOString();
 
-      await this.kv.set(`session:${sessionId}`, session);
-      await this.kv.set(`extraction:${extractionId}`, extraction);
+      await this.redisClient.set(`session:${sessionId}`, JSON.stringify(session));
+      await this.redisClient.set(`extraction:${extractionId}`, JSON.stringify(extraction));
       
       console.log(`✅ Logged structured extraction: ${extractionId}`);
       return extraction;
@@ -328,8 +353,8 @@ export class DatabaseService {
       session.personalInterests.push(interest);
       session.updatedAt = new Date().toISOString();
 
-      await this.kv.set(`session:${sessionId}`, session);
-      await this.kv.set(`interest:${interestId}`, interest);
+      await this.redisClient.set(`session:${sessionId}`, JSON.stringify(session));
+      await this.redisClient.set(`interest:${interestId}`, JSON.stringify(interest));
       
       console.log(`✅ Added personal interest: ${interestId}`);
       return interest;
@@ -374,8 +399,8 @@ export class DatabaseService {
       session.recommendationFeedback.push(feedbackData);
       session.updatedAt = new Date().toISOString();
 
-      await this.kv.set(`session:${sessionId}`, session);
-      await this.kv.set(`feedback:${feedbackId}`, feedbackData);
+      await this.redisClient.set(`session:${sessionId}`, JSON.stringify(session));
+      await this.redisClient.set(`feedback:${feedbackId}`, JSON.stringify(feedbackData));
       
       console.log(`✅ Stored recommendation feedback: ${feedbackId}`);
       return feedbackData;
@@ -428,8 +453,8 @@ export class DatabaseService {
       session.messages = session.messages.filter(m => m.id !== messageId);
       session.updatedAt = new Date().toISOString();
       
-      await this.kv.set(`session:${sessionId}`, session);
-      await this.kv.del(`message:${messageId}`);
+      await this.redisClient.set(`session:${sessionId}`, JSON.stringify(session));
+      await this.redisClient.del(`message:${messageId}`);
       
       console.log(`✅ Deleted message: ${messageId}`);
     } catch (error) {
@@ -441,10 +466,12 @@ export class DatabaseService {
   // Session Management
   async getSessionsWithEntityCounts() {
     try {
-      const sessions = await this.kv.keys('session:*');
+      const sessions = await this.redisClient.keys('session:*');
       const sessionData = await Promise.all(
         sessions.map(async (key) => {
-          const session = await this.kv.get(key);
+          const sessionData = await this.redisClient.get(key);
+          if (!sessionData) return null;
+          const session = JSON.parse(sessionData);
           return {
             ...session,
             entityCount: session?.entities?.length || 0
@@ -460,7 +487,7 @@ export class DatabaseService {
 
   async deleteChatSession(sessionId: string) {
     try {
-      await this.kv.del(`session:${sessionId}`);
+      await this.redisClient.del(`session:${sessionId}`);
       console.log(`✅ Deleted chat session: ${sessionId}`);
     } catch (error) {
       console.error('❌ Failed to delete chat session:', error);
@@ -502,8 +529,8 @@ export class DatabaseService {
       session.apiCalls.push(apiCall);
       session.updatedAt = new Date().toISOString();
 
-      await this.kv.set(`session:${sessionId}`, session);
-      await this.kv.set(`api_call:${callId}`, apiCall);
+      await this.redisClient.set(`session:${sessionId}`, JSON.stringify(session));
+      await this.redisClient.set(`api_call:${callId}`, JSON.stringify(apiCall));
       
       console.log(`✅ Logged API call: ${callId}`);
       return apiCall;
@@ -535,7 +562,7 @@ export class DatabaseService {
       session.entities.push(...entities);
       session.updatedAt = new Date().toISOString();
 
-      await this.kv.set(`session:${sessionId}`, session);
+      await this.redisClient.set(`session:${sessionId}`, JSON.stringify(session));
       
       console.log(`✅ Stored ${entities.length} entities from response`);
       return entities;
@@ -598,7 +625,7 @@ export class DatabaseService {
       session.persona.confidence = confidence;
       session.updatedAt = new Date().toISOString();
 
-      await this.kv.set(`session:${sessionId}`, session);
+      await this.redisClient.set(`session:${sessionId}`, JSON.stringify(session));
       
       console.log(`✅ Updated persona confidence: ${confidence}`);
     } catch (error) {
@@ -613,10 +640,11 @@ export class DatabaseService {
 
   async updatePersonalInterestEntityId(interestId: string, entityId: string) {
     try {
-      const interest = await this.kv.get(`interest:${interestId}`);
-      if (interest) {
+      const interestData = await this.redisClient.get(`interest:${interestId}`);
+      if (interestData) {
+        const interest = JSON.parse(interestData);
         interest.entityId = entityId;
-        await this.kv.set(`interest:${interestId}`, interest);
+        await this.redisClient.set(`interest:${interestId}`, JSON.stringify(interest));
         console.log(`✅ Updated personal interest entity ID: ${interestId}`);
       }
     } catch (error) {
@@ -636,7 +664,7 @@ export class DatabaseService {
       if (interest) {
         interest.confidence = Math.max(0, Math.min(1, (interest.confidence || 0) + delta));
         session.updatedAt = new Date().toISOString();
-        await this.kv.set(`session:${sessionId}`, session);
+        await this.redisClient.set(`session:${sessionId}`, JSON.stringify(session));
         console.log(`✅ Updated personal interest confidence: ${interestName}`);
       }
     } catch (error) {
@@ -648,7 +676,7 @@ export class DatabaseService {
   // Token Usage Management
   async saveTokenUsage(usage: any) {
     try {
-      await this.kv.set('global_token_usage', usage);
+      await this.redisClient.set('global_token_usage', JSON.stringify(usage));
       console.log('✅ Saved token usage');
     } catch (error) {
       console.error('❌ Failed to save token usage:', error);
@@ -675,8 +703,8 @@ export class DatabaseService {
       session.audienceCharacteristics.push(characteristic);
       session.updatedAt = new Date().toISOString();
 
-      await this.kv.set(`session:${sessionId}`, session);
-      await this.kv.set(`characteristic:${characteristicId}`, characteristic);
+      await this.redisClient.set(`session:${sessionId}`, JSON.stringify(session));
+      await this.redisClient.set(`characteristic:${characteristicId}`, JSON.stringify(characteristic));
       
       console.log(`✅ Added audience characteristic: ${characteristicId}`);
       return characteristic;
@@ -705,8 +733,8 @@ export class DatabaseService {
       session.qlooResponses.push(responseWithId);
       session.updatedAt = new Date().toISOString();
 
-      await this.kv.set(`session:${sessionId}`, session);
-      await this.kv.set(`qloo:${responseId}`, responseWithId);
+      await this.redisClient.set(`session:${sessionId}`, JSON.stringify(session));
+      await this.redisClient.set(`qloo:${responseId}`, JSON.stringify(responseWithId));
       
       console.log(`✅ Added Qloo response: ${responseId}`);
       return responseWithId;
@@ -719,8 +747,10 @@ export class DatabaseService {
   // Cleanup
   async cleanup() {
     try {
-      // Close any open connections if needed
-      console.log('✅ DatabaseService cleanup completed');
+      if (this.redisClient) {
+        await this.redisClient.quit();
+        console.log('✅ DatabaseService cleanup completed');
+      }
     } catch (error) {
       console.error('❌ Failed to cleanup database service:', error);
     }
