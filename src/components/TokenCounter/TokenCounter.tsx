@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { ApiKeyManager } from './ApiKeyManager';
 
 interface TokenUsage {
   totalTokens: number;
@@ -165,7 +166,7 @@ export const TokenCounter: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-4">
             <div className="text-xs text-slate-400">
               Last updated: {new Date(usage.lastUpdated).toLocaleTimeString()}
             </div>
@@ -175,6 +176,7 @@ export const TokenCounter: React.FC = () => {
             >
               Refresh
             </button>
+            <ApiKeyManager />
           </div>
         </div>
       </div>

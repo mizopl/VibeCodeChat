@@ -1,6 +1,6 @@
 // Configuration for QLOO AGENT system
 export const config = {
-  // API Keys
+  // API Keys - can be overridden by localStorage in client-side
   googleApiKey: process.env.GOOGLE_API_KEY || '',
   qlooApiKey: process.env.QLOO_API_KEY || '',
   vercelOidcToken: process.env.VERCEL_OIDC_TOKEN || '',
