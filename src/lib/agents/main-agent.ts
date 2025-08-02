@@ -11,6 +11,7 @@ import { getDatabaseService } from '../database/database';
 import { ChatHistoryAgent } from './chat-history-agent';
 import { EntityRetrievalTool } from './entity-retrieval-tool';
 import { SignalTagSelector } from './signal-tag-selector';
+import { configureGoogleAI } from '../utils/ai-config';
 
 export class MainAgent {
   private qlooAgent: QlooAgent;
@@ -857,8 +858,13 @@ Use this persona information to make your response more personalized and relevan
 
 Provide a helpful, conversational response to the user's query.`;
 
+      // Configure Google AI with API key from localStorage
+      configureGoogleAI();
+      
       const response = await generateText({
         model: google('gemini-2.5-flash'),
+      // Configure Google AI with API key from localStorage
+      configureGoogleAI();
         prompt,
         maxTokens: 600,
       });

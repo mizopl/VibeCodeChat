@@ -93,6 +93,8 @@ Answer with JSON:
 
     const result = await generateText({
       model: google('gemini-2.5-flash'),
+      // Configure Google AI with API key from localStorage
+      configureGoogleAI();
       prompt,
       maxTokens: 200
     });

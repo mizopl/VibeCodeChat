@@ -1,6 +1,7 @@
 import { generateText } from 'ai';
 import { google } from '@ai-sdk/google';
 import { broadcastDebugMessage } from '../utils/debug';
+import { configureGoogleAI } from '../utils/ai-config';
 
 export interface ExtractedNameLocation {
   name?: string;
@@ -23,8 +24,13 @@ export class NameLocationExtractor {
 
   async extractFromMessage(message: string): Promise<ExtractedNameLocation> {
     try {
+      // Configure Google AI with API key from localStorage
+      configureGoogleAI();
+      
       const result = await generateText({
         model: google('gemini-2.5-flash'),
+      // Configure Google AI with API key from localStorage
+      configureGoogleAI();
         prompt: `Extract the user's name, location, and gender from this message. If no name, location, or gender is mentioned, return null for that field.
 
 Message: "${message}"
@@ -99,8 +105,13 @@ Only return valid JSON.`,
         .map(msg => msg.content)
         .join('\n');
 
+      // Configure Google AI with API key from localStorage
+      configureGoogleAI();
+      
       const result = await generateText({
         model: google('gemini-2.5-flash'),
+      // Configure Google AI with API key from localStorage
+      configureGoogleAI();
         prompt: `Analyze this conversation and extract the user's name, location, and gender.
 
 Conversation:

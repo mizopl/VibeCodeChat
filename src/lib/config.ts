@@ -50,12 +50,8 @@ export function validateConfig() {
                       process.env.VERCEL_ENV === 'production' ||
                       process.env.VERCEL_ENV === 'preview';
   
-  // Only validate required keys in production
+  // Only validate QLOO_API_KEY in production (Google API key is set manually via UI)
   if (isProduction) {
-    if (!config.googleApiKey) {
-      errors.push('GOOGLE_API_KEY is required');
-    }
-    
     if (!config.qlooApiKey) {
       errors.push('QLOO_API_KEY is required');
     }

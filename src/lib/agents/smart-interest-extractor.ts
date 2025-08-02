@@ -81,6 +81,8 @@ Return as JSON array:
 
       const result = await generateText({
         model: google('gemini-2.5-flash'),
+      // Configure Google AI with API key from localStorage
+      configureGoogleAI();
         prompt,
         maxTokens: 800
       });
@@ -177,6 +179,8 @@ Return as JSON array:
 
       const result = await generateText({
         model: google('gemini-2.5-flash'),
+      // Configure Google AI with API key from localStorage
+      configureGoogleAI();
         prompt,
         maxTokens: 800
       });

@@ -178,6 +178,8 @@ export class QlooAgent {
 
       const { object } = await generateObject({
         model: google('gemini-2.5-flash'),
+      // Configure Google AI with API key from localStorage
+      configureGoogleAI();
         schema: QlooParameterSchema,
         schemaName: 'QlooParameterExtraction',
         schemaDescription: 'Extract parameters for Qloo API calls from user queries',

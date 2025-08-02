@@ -2,6 +2,7 @@ import { generateText, generateObject } from 'ai';
 import { google } from '@ai-sdk/google';
 import { getDatabaseService } from '../database/database';
 import { getQlooTags, getEntity, getQlooTagTypes } from '../qloo/api';
+import { configureGoogleAI } from '../utils/ai-config';
 
 export interface PersonaUpdate {
   name?: string;
@@ -81,8 +82,13 @@ ${userMessages}
 
 Extract all relevant persona information:`;
 
+      // Configure Google AI with API key from localStorage
+      configureGoogleAI();
+      
       const result = await generateText({
         model: google('gemini-1.5-flash'),
+      // Configure Google AI with API key from localStorage
+      configureGoogleAI();
         prompt,
         maxTokens: 1000
       });

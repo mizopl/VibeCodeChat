@@ -43,6 +43,8 @@ Respond in JSON format:
 
     const result = await generateText({
       model: google('gemini-2.5-flash'),
+      // Configure Google AI with API key from localStorage
+      configureGoogleAI();
       prompt,
       maxTokens: 300
     });
@@ -175,6 +177,8 @@ Respond with just the selected tag names, comma-separated:`;
 
     const result = await generateText({
       model: google('gemini-2.5-flash'),
+      // Configure Google AI with API key from localStorage
+      configureGoogleAI();
       prompt,
       maxTokens: 200
     });
